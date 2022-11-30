@@ -123,6 +123,49 @@ def cohen_sutherland_line_clip(segment_first, segment_second, rect_min, rect_max
     return collision, list(map(round, segment_first)), list(map(round, segment_second))
 
 
+def dijkstra_algorithm(g, start_node):
+    unvisited_nodes = g.get_vertices()
+    shortest_path = {}
+    previous_nodes = {}
+    for node in unvisited_nodes:
+        shortest_path[node] = inf
+    shortest_path[start_node] = 0
+
+    while unvisited_nodes:
+        current_min_node = None
+        for node in unvisited_nodes:
+            if current_min_node is None:
+                current_min_node = node
+            elif shortest_path[node] < shortest_path[current_min_node]:
+                current_min_node = node
+
+        neighbours = g.get_adjacent(current_min_node)
+        for neighbour in neighbours:
+            tentative_value = shortest_path[current_min_node] + g.get_edge_weight(current_min_node, neighbour)
+            if tentative_value < shortest_path[neighbour]:
+                shortest_path[neighbour] = tentative_value
+                previous_nodes[neighbour] = current_min_node
+
+        unvisited_nodes.remove(current_min_node)
+
+    return previous_nodes, shortest_path
+
+
+def print_result(previous_nodes, shortest_path, start_node, target_node):
+    path = []
+    node = target_node
+
+    while node != start_node:
+        path.append(node)
+        node = previous_nodes[node]
+
+    # Добавить начальный узел вручную
+    path.append(start_node)
+
+    print("Найден следующий лучший маршрут с ценностью {}.".format(shortest_path[target_node]))
+    return path
+
+
 def get_step(first_point, second_point, step=STEP):
     dist = get_distance(first_point, second_point)
     k = step / dist

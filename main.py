@@ -21,8 +21,7 @@ class Window(QMainWindow):
         obstacles = self.obstacles
         self.qinit = qinit
         self.qend = qend
-        self.edges = self.rapidly_exploring_random_trees(n, qinit, qend, obstacles)
-
+        self.edges, self.result = self.rapidly_exploring_random_trees(n, qinit, qend, obstacles)
         self.flag = True
 
     def __init__(self):
@@ -33,6 +32,7 @@ class Window(QMainWindow):
         self.qinit = None
         self.qend = None
         self.edges = []
+        self.result = []
         self.obstacles = []
 
         self.rrt_start = QPushButton(self)
@@ -134,8 +134,9 @@ class Window(QMainWindow):
                 pass
         last = RRT.nearest(g, q_end)
         g.add_edge(last, q_end)
-
-        return g.edges
+        previous_nodes, shortest_path = RRT.dijkstra_algorithm(g, q_init)
+        result = RRT.print_result(previous_nodes, shortest_path, q_init, q_end)
+        return g.edges, result
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -163,6 +164,10 @@ class Window(QMainWindow):
             for edge in self.edges:
                 painter.drawLine(edge[0][0], RRT.MAXIMUM_Y - edge[0][1], edge[1][0], RRT.MAXIMUM_Y - edge[1][1])
 
+            painter.setPen(QPen(Qt.red, 3, Qt.SolidLine))
+            for i in range(0, len(self.result) - 1):
+                painter.drawLine(self.result[i][0], RRT.MAXIMUM_Y - self.result[i][1], self.result[i + 1][0], RRT.MAXIMUM_Y - self.result[i + 1][1])
+
             painter.setPen(QPen(Qt.green, 8, Qt.SolidLine))
             painter.setBrush(QBrush(Qt.green, Qt.SolidPattern))
             painter.drawEllipse(self.qinit[0] - 5, RRT.MAXIMUM_Y - self.qinit[1] - 5, 10, 10)
@@ -174,6 +179,8 @@ class Window(QMainWindow):
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawLine(RRT.MAXIMUM_X, RRT.MAXIMUM_Y, RRT.MAXIMUM_X, 0)
             painter.drawLine(0, RRT.MAXIMUM_Y, RRT.MAXIMUM_X, RRT.MAXIMUM_Y)
+
+
 
 
 if __name__ == '__main__':
