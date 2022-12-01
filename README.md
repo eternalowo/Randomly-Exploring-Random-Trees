@@ -31,3 +31,9 @@ In this method we will be building tree from our q_init that will fill Cfree. Af
 ![image](https://user-images.githubusercontent.com/98911288/205068756-7439bd7a-2bcd-479e-8f5a-96f06c6bd264.png)
 \
 \
+Well, how RRT works?
+In this algorithm we will be using some auxiliary functions, such as:
+function: nearest(G, Point) - returns the vertex from graph G closest to the Point configuration. If it turns out that the point is close not to one vertex, but to an edge (that is, that the configuration closest to the point lies on the edge of the graph), then at this point the edge is divided into two parts and a new vertex is added to the graph, which then returns.
+
+![case](https://user-images.githubusercontent.com/98911288/205071480-d64a0859-a8dd-4252-a877-5d76e9a3073e.png)
+![case](https://user-images.githubusercontent.com/98911288/205072108-2966cfd2-406f-4a04-b0ba-b0c952fe8fda.png)
