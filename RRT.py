@@ -1,8 +1,6 @@
 from random import randint
 from math import sqrt, inf
 
-import graph
-
 MAXIMUM_X = 1200
 MAXIMUM_Y = 700
 
@@ -12,7 +10,7 @@ RIGHT = 2
 BOTTOM = 4
 TOP = 8
 
-STEP = 30
+STEP = 35
 
 
 class Rectangle:
@@ -159,11 +157,9 @@ def print_result(previous_nodes, shortest_path, start_node, target_node):
         path.append(node)
         node = previous_nodes[node]
 
-    # Добавить начальный узел вручную
     path.append(start_node)
 
-    print("Найден следующий лучший маршрут с ценностью {}.".format(shortest_path[target_node]))
-    return path
+    return path, shortest_path[target_node]
 
 
 def get_step(first_point, second_point, step=STEP):
