@@ -1,1 +1,1 @@
-"# Randomly-Exploring-Random-Trees" 
+<h1>Rapidly Exploring Random Trees Algorithm</h1>
