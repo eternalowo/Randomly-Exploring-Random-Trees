@@ -21,6 +21,19 @@ So our goal is to find the shortest path that our robot can follow in order to g
 \
 \
 \
-Robot configuration - is a set of characteristics which defines position of our robot. Since we have only x and y, our space of configurations is 2D plane with x and y axis', so we can break down our space of configurations to Cfree (configuration space that robot can be located in) and Cobs (configuration space in which robot can't be located)
+Robot configuration - is a set of characteristics which defines position of our robot. Since we have only x and y, our space of configurations С is 2D plane with x and y axis', so we can break down our space of configurations to Cfree (configuration space that robot can be located in) and Cobs (configuration space in which robot can't be located)
 
 ![smth_w](https://user-images.githubusercontent.com/98911288/205062382-a5605820-d3b0-4185-82cb-998ebb857d33.png)
+\
+\
+\
+\
+Since in our configuration space the robot configuration is a material point, the problem of finding the shortest path is reduced to the problem of searching in С the shortest curve/polyline lying completely in Cfree and connecting the initial and final configurations of q_init and q_goal.
+
+![smth_w](https://user-images.githubusercontent.com/98911288/205066096-dd8f248a-d11e-4eda-a5b2-8ad0db8f1b2e.png)
+\
+\
+\
+\
+So, in order to find path we will be using method that based on random samples which is Randomly Exploring Random Trees (RRT)
+In this method we will be building tree from our q_init that will fill Cfree. After buiding this tree we will add an q_end into it and we will search for the shortest path from q_init to q_end.
