@@ -45,3 +45,4 @@ Closest configuration is lying on edge of graph:
 \
 \
 function: steer(X, Y, obstacles) - returns a new configuration Z from Cfree, lying on the segment [X, Y] with fixed step, such that collision_free(X, Z) (checks if [X, Z] crossing any obstacle in C, here I'm using Cohen-Sutherland algorithm which I already described right here --> https://github.com/eternalowo/Cohen-Sutherland-Algorithm)
+![case](https://user-images.githubusercontent.com/98911288/205076842-9bf41380-087f-4670-9a8b-f02512b3d225.png)
