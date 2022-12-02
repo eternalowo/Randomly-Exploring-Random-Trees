@@ -4,7 +4,7 @@ import sys
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-
+from time import sleep
 
 class Window(QMainWindow):
 
@@ -192,7 +192,6 @@ class Window(QMainWindow):
             for i in range(0, len(self.result) - 1):
                 painter.drawLine(self.result[i][0], RRT.MAXIMUM_Y - self.result[i][1], self.result[i + 1][0],
                                  RRT.MAXIMUM_Y - self.result[i + 1][1])
-
             painter.setPen(QPen(Qt.green, 8, Qt.SolidLine))
             painter.setBrush(QBrush(Qt.green, Qt.SolidPattern))
             painter.drawEllipse(self.qinit[0] - 5, RRT.MAXIMUM_Y - self.qinit[1] - 5, 10, 10)
@@ -204,6 +203,7 @@ class Window(QMainWindow):
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawLine(RRT.MAXIMUM_X, RRT.MAXIMUM_Y, RRT.MAXIMUM_X, 0)
             painter.drawLine(0, RRT.MAXIMUM_Y, RRT.MAXIMUM_X, RRT.MAXIMUM_Y)
+            self.update()
             painter.end()
 
 
