@@ -212,7 +212,7 @@ def nearest(g, x):
 
 
 def steer(x, y, obstacles):
-    z = get_step(x, y)
+    z = y
     for obstacle in obstacles:
         res = cohen_sutherland_line_clip(x, z, obstacle.min_p, obstacle.max_p)
         if res[0]:
