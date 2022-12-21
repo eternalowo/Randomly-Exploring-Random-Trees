@@ -8,288 +8,228 @@ from PyQt5.QtWidgets import *
 
 class Window(QMainWindow):
 
-    def create_obstacle(self):
-        self.obstacles.append(
-            RRT.Rectangle((int(self.obstacle_min_input_x.text()), int(self.obstacle_min_input_y.text())),
-                          (int(self.obstacle_max_input_x.text()), int(self.obstacle_max_input_y.text()))))
-
-    def algorithm_start(self):
-
-        qinit = (int(self.qinit_input_x.text()), int(self.qinit_input_y.text()))
-        qend = (int(self.qend_input_x.text()), int(self.qend_input_y.text()))
-        n = (int(self.iterations_input.text()))
-        obstacles = self.obstacles
-        self.qinit = qinit
-        self.qend = qend
-        self.edges, self.result, self.vertices = self.rapidly_exploring_random_trees(n, qinit, qend, obstacles)
-        self.flag = True
-
-    def stop_exec(self):
-        exit(1)
-
-    def refresh_obst(self):
-        self.obstacles = []
-
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #808080")
 
         self.flag = False
 
         self.qinit = None
-        self.qend = None
+        self.qgoal = None
         self.edges = []
         self.vertices = []
         self.result = []
         self.obstacles = []
         self.message = ''
+        self.iterations = 100
 
-        self.result_label = QLabel(self)
-        self.result_label.setGeometry(QRect(400, 800, 1000, 50))
-        self.result_label.setObjectName("rrt_label")
-        self.result_label.setStyleSheet("font-size: 36px;"
-                                        " color: #ffffff;"
-                                        " font-family: 'Verdana'")
-        self.result_label.setText("Result:")
+        self.setObjectName("Window")
+        self.setStyleSheet("background-color: rgb(255, 236, 112);\n"
+                           "border-radius: 20;")
 
-        self.rrt_start = QPushButton(self)
-        self.rrt_start.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 640, 151, 41))
-        self.rrt_start.setObjectName("rrt_start")
-        self.rrt_start.setText("Start Algorithm")
-        self.rrt_start.setStyleSheet("font-family: 'Verdana';"
-                                     " background-color: #ffffff;"
-                                     " box-shadow: none;"
-                                     " border-radius: 10")
-        self.rrt_start.clicked.connect(self.algorithm_start)
+        self.import_button = QPushButton(self)
+        self.import_button.setGeometry(QRect(20, 740, 181, 41))
+        self.import_button.setStyleSheet("background-color: rgb(170, 237, 255);\n"
+                                         "border-radius:20;\n"
+                                         "font: 75 14pt \"MS Sans Serif\";")
+        self.import_button.setObjectName("import_button")
+        self.import_button.setText("Import")
+        self.import_button.clicked.connect(self.import_file)
 
-        self.iterations_label = QLabel(self)
-        self.iterations_label.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 410, 200, 20))
-        self.iterations_label.setObjectName("iterations_lable")
-        self.iterations_label.setStyleSheet("color: #ffffff;"
-                                            " font-family: 'Verdana'")
-        self.iterations_label.setText("Enter the number of iterations")
+        self.export_button = QPushButton(self)
+        self.export_button.setGeometry(QRect(230, 740, 181, 41))
+        self.export_button.setStyleSheet("background-color: rgb(170, 237, 255);\n"
+                                         "border-radius:20;\n"
+                                         "font: 75 14pt \"MS Sans Serif\";")
+        self.export_button.setObjectName("export_button")
+        self.export_button.setText("Export")
+        self.export_button.clicked.connect(self.export_file)
 
-        self.iterations_input = QLineEdit(self)
-        self.iterations_input.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 440, 151, 31))
-        self.iterations_input.setObjectName("iterations_input")
-        self.iterations_input.setStyleSheet("font-family: 'Verdana';"
-                                            " background-color: #ffffff;"
-                                            " box-shadow: none;")
+        self.add_qinit_button = QPushButton(self)
+        self.add_qinit_button.setGeometry(QRect(940, 30, 191, 41))
+        self.add_qinit_button.setStyleSheet("background-color: rgb(170, 170, 255);\n"
+                                            "border-radius:20;\n"
+                                            "font: 75 14pt \"MS Sans Serif\";")
+        self.add_qinit_button.setObjectName("add_qinit_button")
+        self.add_qinit_button.setText("Add Qinit")
+        self.add_qinit_button.clicked.connect(self.add_qinit)
 
-        self.obstacle_max_input_x = QLineEdit(self)
-        self.obstacle_max_input_x.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 240, 31, 31))
-        self.obstacle_max_input_x.setObjectName("obstacle_max_input_x")
-        self.obstacle_max_input_x.setStyleSheet("font-family: 'Verdana';"
-                                                " background-color: #ffffff;"
-                                                " box-shadow: none;")
+        self.input_qinit = QLineEdit(self)
+        self.input_qinit.setGeometry(QRect(940, 90, 191, 31))
+        self.input_qinit.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+                                       "border-radius: 10;")
+        self.input_qinit.setObjectName("input_qinit")
 
-        self.obstacle_max_label = QLabel(self)
-        self.obstacle_max_label.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 210, 171, 20))
-        self.obstacle_max_label.setObjectName("obstacle_max_label")
-        self.obstacle_max_label.setStyleSheet("color: #ffffff;"
-                                              " font-family: 'Verdana'")
-        self.obstacle_max_label.setText("Enter rectangle max point")
+        self.add_qgoal_button = QPushButton(self)
+        self.add_qgoal_button.setGeometry(QRect(940, 140, 191, 41))
+        self.add_qgoal_button.setStyleSheet("background-color: rgb(170, 170, 255);\n"
+                                            "border-radius:20;\n"
+                                            "font: 75 14pt \"MS Sans Serif\";")
+        self.add_qgoal_button.setObjectName("add_qgoal_button")
+        self.add_qgoal_button.setText("Add QGoal")
+        self.add_qgoal_button.clicked.connect(self.add_qgoal)
 
-        self.obstacle_push_button = QPushButton(self)
-        self.obstacle_push_button.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 360, 151, 41))
-        self.obstacle_push_button.setObjectName("obstacle_push_button")
-        self.obstacle_push_button.setText("Add obstacle")
-        self.obstacle_push_button.setStyleSheet("font-family: 'Verdana';"
-                                                " background-color: #ffffff;"
-                                                " box-shadow: none;"
-                                                " border-radius: 10;")
-        self.obstacle_push_button.clicked.connect(self.create_obstacle)
+        self.input_qgoal = QLineEdit(self)
+        self.input_qgoal.setGeometry(QRect(940, 200, 191, 31))
+        self.input_qgoal.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+                                       "border-radius: 10;")
+        self.input_qgoal.setObjectName("input_qgoal")
 
-        self.qinit_label = QLabel(self)
-        self.qinit_label.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 480, 151, 20))
-        self.qinit_label.setObjectName("qinit_label")
-        self.qinit_label.setStyleSheet("color: #ffffff;"
-                                       " font-family: 'Verdana'")
-        self.qinit_label.setText("Enter the starting point")
+        self.add_obstacle_button = QPushButton(self)
+        self.add_obstacle_button.setGeometry(QRect(940, 440, 191, 41))
+        self.add_obstacle_button.setStyleSheet("background-color: rgb(170, 237, 255);\n"
+                                               "border-radius:20;\n"
+                                               "font: 75 14pt \"MS Sans Serif\";")
+        self.add_obstacle_button.setObjectName("add_obstacle_button")
+        self.add_obstacle_button.setText("Add Obstacle")
+        self.add_obstacle_button.clicked.connect(self.add_obstacle)
 
-        self.obstacle_min_input_x = QLineEdit(self)
-        self.obstacle_min_input_x.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 310, 31, 31))
-        self.obstacle_min_input_x.setObjectName("obstacle_min_input_x")
-        self.obstacle_min_input_x.setStyleSheet("font-family: 'Verdana';"
-                                                " background-color: #ffffff;"
-                                                " box-shadow: none;")
+        self.input_obstacle = QLineEdit(self)
+        self.input_obstacle.setGeometry(QRect(940, 500, 191, 31))
+        self.input_obstacle.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+                                          "border-radius: 10;\n"
+                                          "")
+        self.input_obstacle.setObjectName("input_obstacle")
 
-        self.obstacle_min_label = QLabel(self)
-        self.obstacle_min_label.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 280, 171, 20))
-        self.obstacle_min_label.setObjectName("obstacle_min_label")
-        self.obstacle_min_label.setStyleSheet("color: #ffffff;"
-                                              " font-family: 'Verdana'")
-        self.obstacle_min_label.setText("Enter rectangle min point")
+        self.remove_obstacles_button = QPushButton(self)
+        self.remove_obstacles_button.setGeometry(QRect(940, 550, 191, 41))
+        self.remove_obstacles_button.setStyleSheet("background-color: rgb(170, 237, 255);\n"
+                                                   "border-radius:20;\n"
+                                                   "font: 75 14pt \"MS Sans Serif\";")
+        self.remove_obstacles_button.setObjectName("remove_obstacles_button")
+        self.remove_obstacles_button.setText("Remove Obstacles")
+        self.remove_obstacles_button.clicked.connect(self.remove_obstacles)
 
-        self.rrt_label = QLabel(self)
-        self.rrt_label.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 140, 280, 21))
-        self.rrt_label.setObjectName("rrt_label")
-        self.rrt_label.setStyleSheet("color: #ffffff;"
-                                     " font-family: 'Verdana'")
-        self.rrt_label.setText("Rapidly Exploring Random Trees Algorithm")
+        self.start_button = QPushButton(self)
+        self.start_button.setGeometry(QRect(940, 680, 191, 41))
+        self.start_button.setStyleSheet("background-color: rgb(170, 170, 255);\n"
+                                        "border-radius:20;\n"
+                                        "font: 75 14pt \"MS Sans Serif\";")
+        self.start_button.setObjectName("start_button")
+        self.start_button.setText("Start Algorithm")
+        self.start_button.clicked.connect(self.start_algorithm)
 
-        self.alert_label = QLabel(self)
-        self.alert_label.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 180, 280, 16))
-        self.alert_label.setObjectName("alert_label")
-        self.alert_label.setStyleSheet("color: #ffffff;"
-                                       " font-family: 'Verdana'")
-        self.alert_label.setText("All values should be entered as integers!")
+        self.exit_button = QPushButton(self)
+        self.exit_button.setGeometry(QRect(940, 740, 191, 41))
+        self.exit_button.setStyleSheet("background-color: rgb(170, 170, 255);\n"
+                                       "border-radius:20;\n"
+                                       "font: 75 14pt \"MS Sans Serif\";")
+        self.exit_button.setObjectName("exit_button")
+        self.exit_button.setText("Exit")
+        self.exit_button.clicked.connect(self.stop_exec)
 
-        self.obstacle_max_input_y = QLineEdit(self)
-        self.obstacle_max_input_y.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 220, 240, 31, 31))
-        self.obstacle_max_input_y.setObjectName("obstacle_max_input_y")
-        self.obstacle_max_input_y.setStyleSheet("font-family: 'Verdana';"
-                                                " background-color: #ffffff;"
-                                                " box-shadow: none;")
+        self.input_iterations = QLineEdit(self)
+        self.input_iterations.setGeometry(QRect(940, 310, 191, 31))
+        self.input_iterations.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+                                            "border-radius: 10;")
+        self.input_iterations.setObjectName("input_iterations")
 
-        self.obstacle_min_input_y = QLineEdit(self)
-        self.obstacle_min_input_y.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 220, 310, 31, 31))
-        self.obstacle_min_input_y.setObjectName("obstacle_min_input_y")
-        self.obstacle_min_input_y.setStyleSheet("font-family: 'Verdana';"
-                                                " background-color: #ffffff;"
-                                                " box-shadow: none;")
+        self.add_iterations_button = QPushButton(self)
+        self.add_iterations_button.setGeometry(QRect(940, 250, 191, 41))
+        self.add_iterations_button.setStyleSheet("background-color: rgb(170, 170, 255);\n"
+                                                 "border-radius:20;\n"
+                                                 "font: 75 14pt \"MS Sans Serif\";")
+        self.add_iterations_button.setObjectName("add_iterations_button")
+        self.add_iterations_button.setText("Set Iterations")
+        self.add_iterations_button.clicked.connect(self.get_iterations)
 
-        self.qinit_input_x = QLineEdit(self)
-        self.qinit_input_x.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 510, 31, 31))
-        self.qinit_input_x.setObjectName("qinit_input_x")
-        self.qinit_input_x.setStyleSheet("font-family: 'Verdana';"
-                                         " background-color: #ffffff;"
-                                         " box-shadow: none;")
+    def add_qinit(self):
+        self.qinit = tuple(int(item) for item in self.input_qinit.text().split(','))
 
-        self.qinit_input_y = QLineEdit(self)
-        self.qinit_input_y.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 220, 510, 31, 31))
-        self.qinit_input_y.setObjectName("qinit_input_y")
-        self.qinit_input_y.setStyleSheet("font-family: 'Verdana';"
-                                         " background-color: #ffffff;"
-                                         " box-shadow: none;")
+    def add_qgoal(self):
+        self.qgoal = tuple(int(item) for item in self.input_qgoal.text().split(','))
 
-        self.qend_input_x = QLineEdit(self)
-        self.qend_input_x.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 580, 31, 31))
-        self.qend_input_x.setObjectName("qend_input_x")
-        self.qend_input_x.setStyleSheet("font-family: 'Verdana';"
-                                        " background-color: #ffffff;"
-                                        " box-shadow: none;")
+    def get_iterations(self):
+        self.iterations = int(self.input_iterations.text())
 
-        self.qend_input_y = QLineEdit(self)
-        self.qend_input_y.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 220, 580, 31, 31))
-        self.qend_input_y.setObjectName("qend_input_y")
-        self.qend_input_y.setStyleSheet("font-family: 'Verdana';"
-                                        " background-color: #ffffff;"
-                                        " box-shadow: none;")
+    def add_obstacle(self):
+        tup = tuple(int(item) for item in self.input_obstacle.text().split(','))
+        self.obstacles.append(RRT.Rectangle((tup[0], tup[1]), (tup[2], tup[3])))
 
-        self.qend_label = QLabel(self)
-        self.qend_label.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 550, 151, 20))
-        self.qend_label.setObjectName("qend_label")
-        self.qend_label.setStyleSheet("color: #ffffff;"
-                                      " font-family: 'Verdana'")
-        self.qend_label.setText("Enter the ending point")
+    def remove_obstacles(self):
+        self.obstacles = []
 
-        self.stop_executing = QPushButton(self)
-        self.stop_executing.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 800, 151, 41))
-        self.stop_executing.setObjectName("stop_executing")
-        self.stop_executing.setText("Exit")
-        self.stop_executing.setStyleSheet("font-family: 'Verdana';"
-                                          " background-color: #ffffff;"
-                                          " box-shadow: none;"
-                                          " border-radius: 10")
-        self.stop_executing.clicked.connect(self.stop_exec)
-        self.refresh_obs = QPushButton(self)
-        self.refresh_obs.setGeometry(QRect(RRT.MAXIMUM_X - 40 + 180, 750, 151, 41))
-        self.refresh_obs.setObjectName("stop_executing")
-        self.refresh_obs.setText("Refresh obstacles")
-        self.refresh_obs.setStyleSheet("font-family: 'Verdana';"
-                                       " background-color: #ffffff;"
-                                       " box-shadow: none;"
-                                       " border-radius: 10")
-        self.refresh_obs.clicked.connect(self.refresh_obst)
+    def stop_exec(self):
+        exit(1)
 
-    def rapidly_exploring_random_trees(self, n, q_init, q_end, obstacles):
+    def import_file(self):
+        filename, filetype = QFileDialog.getOpenFileName(self,
+                                                         "Выбрать файл",
+                                                         ".",
+                                                         "Text Files(*.txt);;JPEG Files(*.jpeg);;\
+                                                         PNG Files(*.png);;GIF File(*.gif);;All Files(*)")
+        with open(f'{filename}', 'r') as F:
+            lines = F.readlines()
+        self.iterations = int(lines[0])
+        self.qinit = tuple(map(int, lines[1].split(', ')))
+        self.qgoal = tuple(map(int, lines[2].split(', ')))
+        for i in range(3, len(lines)):
+            line = tuple(map(int, lines[i].split(', ')))
+            self.obstacles.append(RRT.Rectangle((line[0], line[1]), (line[2], line[3])))
 
-        flag = False
-        for obstacle in obstacles:
-            if obstacle.if_inside(q_init) or obstacle.if_inside(q_end):
-                flag = True
-                self.result_label.setText(f"Can't reach q_end")
-                break
+    def export_file(self):
+        filename, filetype = QFileDialog.getOpenFileName(self,
+                                                         "Выбрать файл",
+                                                         ".",
+                                                         "Text Files(*.txt);;JPEG Files(*.jpeg);;\
+                                                         PNG Files(*.png);;GIF File(*.gif);;All Files(*)")
+        with open(f'{filename}', 'w') as F:
+            F.write(f'{self.iterations}' + '\n')
+            F.write(f'{self.qinit}'[1:-1:] + '\n')
+            F.write(f'{self.qgoal}'[1:-1:] + '\n')
+            for item in self.obstacles:
+                F.write(f'{item.min_p}'[1:-1:] + ', ' + f'{item.max_p}'[1:-1:])
 
-        g = graph.Graph()
-        g.add_vertex(q_init)
-        for i in range(n):
-            try:
-                q_rand = RRT.random_sample()
-                qn = RRT.nearest(g, q_rand)
-                if qn != q_rand:
-                    qs = RRT.steer(qn, q_rand, obstacles)
-                    g.add_edge(qn, qs)
-            except ValueError:
-                pass
-        last = RRT.nearest(g, q_end)
-
-        for obstacle in obstacles:
-            flag, _, _ = RRT.cohen_sutherland_line_clip(last, q_end, obstacle.min_p, obstacle.max_p)
-            if flag:
-                flag = True
-                break
-
-        if not flag:
-            g.add_edge(last, q_end)
-            previous_nodes, shortest_path = RRT.dijkstra_algorithm(g, q_init)
-            result, self.message = RRT.print_result(previous_nodes, shortest_path, q_init, q_end)
-            self.result_label.setText(f"Result: {self.message}")
-            return g.edges, result, g.get_vertices()
-        else:
-            self.result_label.setText(f"Can't reach q_end")
-        return g.edges, [], g.get_vertices()
+    def start_algorithm(self):
+        self.edges, self.result, self.vertices, self.message = RRT.rapidly_exploring_random_trees(self.iterations,
+                                                                                                  self.qinit,
+                                                                                                  self.qgoal,
+                                                                                                  self.obstacles)
+        self.flag = True
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.begin(self)
 
-        painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
-        painter.drawLine(RRT.MAXIMUM_X, RRT.MAXIMUM_Y, RRT.MAXIMUM_X, 0)
-        painter.drawLine(0, RRT.MAXIMUM_Y, RRT.MAXIMUM_X, RRT.MAXIMUM_Y)
+        painter.setPen(QPen(Qt.white, 20, Qt.SolidLine))
+        painter.setBrush(QBrush(Qt.white, Qt.SolidPattern))
+        painter.drawRect(20, 20, 900, 700)
 
         if self.flag:
-            painter.setPen(QPen(Qt.blue, 1, Qt.SolidLine))
+            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+
             for obstacle in self.obstacles:
-                painter.drawLine(obstacle.points[0][0], RRT.MAXIMUM_Y - obstacle.points[0][1],
-                                 obstacle.points[2][0], RRT.MAXIMUM_Y - obstacle.points[2][1])
-                painter.drawLine(obstacle.points[1][0], RRT.MAXIMUM_Y - obstacle.points[1][1],
-                                 obstacle.points[2][0], RRT.MAXIMUM_Y - obstacle.points[2][1])
-                painter.drawLine(obstacle.points[1][0], RRT.MAXIMUM_Y - obstacle.points[1][1],
-                                 obstacle.points[3][0], RRT.MAXIMUM_Y - obstacle.points[3][1])
-                painter.drawLine(obstacle.points[0][0], RRT.MAXIMUM_Y - obstacle.points[0][1],
-                                 obstacle.points[3][0], RRT.MAXIMUM_Y - obstacle.points[3][1])
+                painter.drawLine(20 + obstacle.points[0][0], 20 + RRT.MAXIMUM_Y - obstacle.points[0][1],
+                                 20 + obstacle.points[2][0], 20 + RRT.MAXIMUM_Y - obstacle.points[2][1])
+                painter.drawLine(20 + obstacle.points[1][0], 20 + RRT.MAXIMUM_Y - obstacle.points[1][1],
+                                 20 + obstacle.points[2][0], 20 + RRT.MAXIMUM_Y - obstacle.points[2][1])
+                painter.drawLine(20 + obstacle.points[1][0], 20 + RRT.MAXIMUM_Y - obstacle.points[1][1],
+                                 20 + obstacle.points[3][0], 20 + RRT.MAXIMUM_Y - obstacle.points[3][1])
+                painter.drawLine(20 + obstacle.points[0][0], 20 + RRT.MAXIMUM_Y - obstacle.points[0][1],
+                                 20 + obstacle.points[3][0], 20 + RRT.MAXIMUM_Y - obstacle.points[3][1])
 
-            painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
+            painter.setPen(QPen(Qt.green, 2, Qt.SolidLine))
             for edge in self.edges:
-                painter.drawLine(edge[0][0], RRT.MAXIMUM_Y - edge[0][1], edge[1][0], RRT.MAXIMUM_Y - edge[1][1])
-            painter.setPen(QPen(Qt.cyan, 8, Qt.SolidLine))
-            painter.setBrush(QBrush(Qt.cyan, Qt.SolidPattern))
-            for v in self.vertices:
-                painter.drawEllipse(v[0] - 1, RRT.MAXIMUM_Y - v[1] - 1, 2, 2)
-            painter.setPen(QPen(Qt.red, 3, Qt.SolidLine))
-            for i in range(0, len(self.result) - 1):
-                painter.drawLine(self.result[i][0], RRT.MAXIMUM_Y - self.result[i][1], self.result[i + 1][0],
-                                 RRT.MAXIMUM_Y - self.result[i + 1][1])
-            painter.setPen(QPen(Qt.green, 8, Qt.SolidLine))
-            painter.setBrush(QBrush(Qt.green, Qt.SolidPattern))
-            painter.drawEllipse(self.qinit[0] - 5, RRT.MAXIMUM_Y - self.qinit[1] - 5, 10, 10)
+                painter.drawLine(20 + edge[0][0], 20 + RRT.MAXIMUM_Y - edge[0][1],
+                                 20 + edge[1][0], 20 + RRT.MAXIMUM_Y - edge[1][1])
 
-            painter.setPen(QPen(Qt.red, 8, Qt.SolidLine))
-            painter.setBrush(QBrush(Qt.red, Qt.SolidPattern))
-            painter.drawEllipse(self.qend[0] - 5, RRT.MAXIMUM_Y - self.qend[1] - 5, 10, 10)
+            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+            for i in range(len(self.result) - 1):
+                painter.drawLine(20 + self.result[i][0], 20 + RRT.MAXIMUM_Y - self.result[i][1],
+                                 20 + self.result[i + 1][0], 20 + RRT.MAXIMUM_Y - self.result[i + 1][1])
 
-            painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
-            painter.drawLine(RRT.MAXIMUM_X, RRT.MAXIMUM_Y, RRT.MAXIMUM_X, 0)
-            painter.drawLine(0, RRT.MAXIMUM_Y, RRT.MAXIMUM_X, RRT.MAXIMUM_Y)
+            painter.setPen(QPen(Qt.green, 10, Qt.SolidLine))
+            painter.drawEllipse(20 + self.qinit[0] - 2, 20 + RRT.MAXIMUM_Y - self.qinit[1] - 2, 4, 4)
+
+            painter.setPen(QPen(Qt.red, 10, Qt.SolidLine))
+            painter.drawEllipse(20 + self.qgoal[0] - 2, 20 + RRT.MAXIMUM_Y - self.qgoal[1] - 2, 4, 4)
+
             self.update()
-            painter.end()
+        painter.end()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = Window()
-    ex.resize(RRT.MAXIMUM_X + 400, RRT.MAXIMUM_Y + 250)
+    ex.resize(1147, 815)
     ex.show()
     sys.exit(app.exec_())

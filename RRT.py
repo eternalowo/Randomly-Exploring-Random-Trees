@@ -1,7 +1,8 @@
 from random import randint
 from math import sqrt, inf
+import graph
 
-MAXIMUM_X = 1200
+MAXIMUM_X = 900
 MAXIMUM_Y = 700
 
 INSIDE = 0
@@ -31,6 +32,10 @@ class Rectangle:
             return True
         else:
             return False
+
+
+def random_sample():
+    return randint(4, MAXIMUM_X - 3), randint(4, MAXIMUM_Y - 3)
 
 
 def p(a, b, c):
@@ -223,5 +228,36 @@ def steer(x, y, obstacles):
     return tuple(z)
 
 
-def random_sample():
-    return randint(4, MAXIMUM_X - 3), randint(4, MAXIMUM_Y - 3)
+def rapidly_exploring_random_trees(n, q_init, q_end, obstacles):
+    flag = False
+    for obstacle in obstacles:
+        if obstacle.if_inside(q_init) or obstacle.if_inside(q_end):
+            flag = True
+            break
+
+    g = graph.Graph()
+    g.add_vertex(q_init)
+    for i in range(n):
+        try:
+            q_rand = random_sample()
+            qn = nearest(g, q_rand)
+            if qn != q_rand:
+                qs = steer(qn, q_rand, obstacles)
+                g.add_edge(qn, qs)
+        except ValueError:
+            pass
+    last = nearest(g, q_end)
+
+    for obstacle in obstacles:
+        flag, _, _ = cohen_sutherland_line_clip(last, q_end, obstacle.min_p, obstacle.max_p)
+        if flag:
+            flag = True
+            break
+
+    if not flag:
+        g.add_edge(last, q_end)
+        previous_nodes, shortest_path = dijkstra_algorithm(g, q_init)
+        result, message = print_result(previous_nodes, shortest_path, q_init, q_end)
+        return g.edges, result, g.get_vertices(), message
+    return g.edges, [], g.get_vertices(), ''
+
