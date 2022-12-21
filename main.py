@@ -132,6 +132,13 @@ class Window(QMainWindow):
         self.add_iterations_button.setText("Set Iterations")
         self.add_iterations_button.clicked.connect(self.get_iterations)
 
+        self.result_label = QLabel(self)
+        self.result_label.setGeometry(QRect(440, 740, 300, 41))
+        self.result_label.setStyleSheet("background-color: rgb(255,255,255);\n"
+                                        "border-radius:5;\n"
+                                        "font: 75 14pt \"MS Sans Serif\";")
+        self.result_label.setText("  Result: ")
+
     def add_qinit(self):
         self.qinit = tuple(int(item) for item in self.input_qinit.text().split(','))
 
@@ -185,6 +192,10 @@ class Window(QMainWindow):
                                                                                                   self.qgoal,
                                                                                                   self.obstacles)
         self.flag = True
+        if self.message != '':
+            self.result_label.setText(f"  Result: {round(float(self.message))}")
+        else:
+            self.result_label.setText(f"  Can't reach QGoal")
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -217,10 +228,17 @@ class Window(QMainWindow):
                 painter.drawLine(20 + self.result[i][0], 20 + RRT.MAXIMUM_Y - self.result[i][1],
                                  20 + self.result[i + 1][0], 20 + RRT.MAXIMUM_Y - self.result[i + 1][1])
 
+            painter.setPen(QPen(Qt.black, 0.5, Qt.SolidLine))
+            painter.setBrush(QBrush(Qt.black, Qt.SolidPattern))
+            for v in self.vertices:
+                painter.drawEllipse(20 + v[0] - 2, 20 + RRT.MAXIMUM_Y - v[1] - 2, 4, 4)
+
             painter.setPen(QPen(Qt.green, 10, Qt.SolidLine))
+            painter.setBrush(QBrush(Qt.green, Qt.SolidPattern))
             painter.drawEllipse(20 + self.qinit[0] - 2, 20 + RRT.MAXIMUM_Y - self.qinit[1] - 2, 4, 4)
 
             painter.setPen(QPen(Qt.red, 10, Qt.SolidLine))
+            painter.setBrush(QBrush(Qt.red, Qt.SolidPattern))
             painter.drawEllipse(20 + self.qgoal[0] - 2, 20 + RRT.MAXIMUM_Y - self.qgoal[1] - 2, 4, 4)
 
             self.update()
