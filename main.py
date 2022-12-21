@@ -228,6 +228,7 @@ class Window(QMainWindow):
             self.iterations = int(lines[0])
             self.qinit = tuple(map(int, lines[1].split(', ')))
             self.qgoal = tuple(map(int, lines[2].split(', ')))
+            self.obstacles = []
             for i in range(3, len(lines)):
                 line = tuple(map(int, lines[i].split(', ')))
                 self.obstacles.append(RRT.Rectangle((line[0], line[1]), (line[2], line[3])))
@@ -260,7 +261,7 @@ class Window(QMainWindow):
                 F.write(f'{self.qinit}'[1:-1:] + '\n')
                 F.write(f'{self.qgoal}'[1:-1:] + '\n')
                 for item in self.obstacles:
-                    F.write(f'{item.min_p}'[1:-1:] + ', ' + f'{item.max_p}'[1:-1:])
+                    F.write(f'{item.min_p}'[1:-1:] + ', ' + f'{item.max_p}'[1:-1:] + '\n')
         except Exception:
             return 0
 
