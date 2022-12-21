@@ -11,10 +11,10 @@ RIGHT = 2
 BOTTOM = 4
 TOP = 8
 
-STEP = 35
-
 
 class Rectangle:
+    """Rectangle class"""
+
     def __init__(self, min_p, max_p):
         self.points = []
         self.min_p = min_p
@@ -25,9 +25,11 @@ class Rectangle:
         self.points.append((max_p[0], min_p[1]))
 
     def get_points(self):
+        """Returns list of rectangle points"""
         return self.points
 
     def if_inside(self, point):
+        """Returns True if point is inside rectangle, returns False otherwise"""
         if not compute_out_code(point, self.min_p, self.max_p):
             return True
         else:
@@ -35,14 +37,17 @@ class Rectangle:
 
 
 def random_sample():
+    """Returns random sample in configurations space"""
     return randint(4, MAXIMUM_X - 3), randint(4, MAXIMUM_Y - 3)
 
 
 def p(a, b, c):
+    """Half-perimeter of triangle"""
     return (a + b + c) / 2
 
 
 def scalar_mult(first_vector, second_vector):
+    """Returns result of scalar multiplying of n-dimensional vectors, or '' if vectors have different size"""
     if len(first_vector) != len(second_vector):
         return ''
     result = 0
@@ -52,14 +57,17 @@ def scalar_mult(first_vector, second_vector):
 
 
 def get_vector(first_point, second_point):
+    """Returns vector from first point to second point as list"""
     return [second_point[0] - first_point[0], second_point[1] - first_point[1]]
 
 
 def get_distance(first_point, second_point):
+    """Returns distance value from first point to second point"""
     return sqrt((second_point[0] - first_point[0]) ** 2 + (second_point[1] - first_point[1]) ** 2)
 
 
 def get_height_point(point, segment_first, segment_second):
+    """Returns the point of height drawn from point lying on the segment from first_point to second_point"""
     component = scalar_mult(get_vector(segment_first, segment_second), get_vector(segment_first, point)) / \
                 scalar_mult(get_vector(segment_first, segment_second), get_vector(segment_first, segment_second))
     vec = get_vector(segment_first, segment_second)
@@ -127,6 +135,7 @@ def cohen_sutherland_line_clip(segment_first, segment_second, rect_min, rect_max
 
 
 def dijkstra_algorithm(g, start_node):
+    """Dijkstra algorithm for finding the shortest paths from start_node to every other in graph g"""
     unvisited_nodes = g.get_vertices()
     shortest_path = {}
     previous_nodes = {}
@@ -155,6 +164,7 @@ def dijkstra_algorithm(g, start_node):
 
 
 def print_result(previous_nodes, shortest_path, start_node, target_node):
+    """Prints result of Dijkstra algorithm"""
     path = []
     node = target_node
 
@@ -167,21 +177,8 @@ def print_result(previous_nodes, shortest_path, start_node, target_node):
     return path, shortest_path[target_node]
 
 
-def get_step(first_point, second_point, step=STEP):
-    dist = get_distance(first_point, second_point)
-    k = step / dist
-    x = round(first_point[0] + k * (second_point[0] - first_point[0]))
-    y = round(first_point[1] + k * (second_point[1] - first_point[1]))
-    if x > MAXIMUM_X or x < 0 or y > MAXIMUM_Y or y < 0:
-        _, p1, p2 = cohen_sutherland_line_clip(first_point, (x, y), (0, 0), (MAXIMUM_X, MAXIMUM_Y))
-        if p1[0] == 0 or p1[0] == MAXIMUM_X or p1[1] == 0 or p1[1] == MAXIMUM_Y:
-            return p1
-        else:
-            return p2
-    return x, y
-
-
 def get_shortest_distance(point, segment_first, segment_second):
+    """Returns shortest distance from point to segment from segment_first to segment_second"""
     second_scalar = scalar_mult(get_vector(segment_second, segment_first), get_vector(point, segment_first))
     third_scalar = scalar_mult(get_vector(segment_first, segment_second), get_vector(point, segment_second))
     if second_scalar > 0 and third_scalar > 0:
@@ -193,6 +190,7 @@ def get_shortest_distance(point, segment_first, segment_second):
 
 
 def nearest(g, x):
+    """Returns closest point in graph to point x"""
     minimum = inf
     vertex_edge = None
     result = None
@@ -217,6 +215,7 @@ def nearest(g, x):
 
 
 def steer(x, y, obstacles):
+    """Returns closest point to x without collisions with any obstacle"""
     z = y
     for obstacle in obstacles:
         res = cohen_sutherland_line_clip(x, z, obstacle.min_p, obstacle.max_p)
@@ -229,6 +228,7 @@ def steer(x, y, obstacles):
 
 
 def rapidly_exploring_random_trees(n, q_init, q_end, obstacles):
+    """Rapidly Exploring Random Trees algorithm"""
     flag = False
     for obstacle in obstacles:
         if obstacle.if_inside(q_init) or obstacle.if_inside(q_end):
@@ -260,4 +260,3 @@ def rapidly_exploring_random_trees(n, q_init, q_end, obstacles):
         result, message = print_result(previous_nodes, shortest_path, q_init, q_end)
         return g.edges, result, g.get_vertices(), message
     return g.edges, [], g.get_vertices(), ''
-

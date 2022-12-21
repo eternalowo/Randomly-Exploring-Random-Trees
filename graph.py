@@ -3,20 +3,20 @@ from math import sqrt
 
 class Graph(object):
     """Graph class"""
+
     def __init__(self):
         self.vertices = set()
         self.adjacent = {}
         self.edges = []
 
     def add_vertex(self, vertex):
-        """Add vertex to the graph."""
+        """Add vertex to the graph"""
         self.vertices.add(vertex)
-        """Add vertex to the graph."""
         if vertex not in self.adjacent:
             self.adjacent[vertex] = []
 
     def add_edge(self, v1, v2):
-        """Add edge to the graph between vertices v1 and v2."""
+        """Add edge to the graph between vertices v1 and v2"""
         self.add_vertex(v1)
         self.add_vertex(v2)
         if v2 not in self.adjacent[v1]:
@@ -54,7 +54,7 @@ class Graph(object):
         return False
 
     def has_edge(self, v1, v2):
-        """Returns True if there is an edge between vertices v1 and v2, False otherwise."""
+        """Returns True if there is an edge between vertices v1 and v2, False otherwise"""
         if v1 not in self.vertices or v2 not in self.vertices:
             return False
         return v2 in self.adjacent[v1]

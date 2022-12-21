@@ -1,5 +1,4 @@
 import RRT
-import graph
 import sys
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -140,57 +139,147 @@ class Window(QMainWindow):
         self.result_label.setText("  Result: ")
 
     def add_qinit(self):
-        self.qinit = tuple(int(item) for item in self.input_qinit.text().split(','))
+        """Adds QInit from QLineEdit"""
+        try:
+            self.qinit = tuple(int(item) for item in self.input_qinit.text().split(','))
+        except (TypeError, ValueError):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Incorrect form")
+            msg.setInformativeText("Use the correct entry form\n"
+                                   "(example: 321, 123)")
+            msg.setWindowTitle("Error")
+            msg.exec_()
 
     def add_qgoal(self):
-        self.qgoal = tuple(int(item) for item in self.input_qgoal.text().split(','))
+        """Adds QGoal from QLineEdit"""
+        try:
+            self.qgoal = tuple(int(item) for item in self.input_qgoal.text().split(','))
+        except (TypeError, ValueError):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Incorrect form")
+            msg.setInformativeText("Use the correct entry form\n"
+                                   "(example: 321, 123)")
+            msg.setWindowTitle("Error")
+            msg.exec_()
 
     def get_iterations(self):
-        self.iterations = int(self.input_iterations.text())
+        """Sets the number of iterations from QLineEdit"""
+        try:
+            self.iterations = int(self.input_iterations.text())
+        except (TypeError, ValueError):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Incorrect form")
+            msg.setInformativeText("Use the correct entry form\n"
+                                   "(example: 1000)")
+            msg.setWindowTitle("Error")
+            msg.exec_()
 
     def add_obstacle(self):
-        tup = tuple(int(item) for item in self.input_obstacle.text().split(','))
-        self.obstacles.append(RRT.Rectangle((tup[0], tup[1]), (tup[2], tup[3])))
+        """Adds obstacle from QLineEdit to obstacles list"""
+        try:
+            tup = tuple(int(item) for item in self.input_obstacle.text().split(','))
+            self.obstacles.append(RRT.Rectangle((tup[0], tup[1]), (tup[2], tup[3])))
+        except (TypeError, ValueError):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Incorrect form")
+            msg.setInformativeText("Use the correct entry form\n"
+                                   "(example: 0, 0, 500, 500)")
+            msg.setWindowTitle("Error")
+            msg.exec_()
 
     def remove_obstacles(self):
+        """Removes all obstacles"""
         self.obstacles = []
 
     def stop_exec(self):
+        """Stops programm"""
         exit(1)
 
     def import_file(self):
-        filename, filetype = QFileDialog.getOpenFileName(self,
-                                                         "Выбрать файл",
-                                                         ".",
-                                                         "Text Files(*.txt);;JPEG Files(*.jpeg);;\
-                                                         PNG Files(*.png);;GIF File(*.gif);;All Files(*)")
-        with open(f'{filename}', 'r') as F:
-            lines = F.readlines()
-        self.iterations = int(lines[0])
-        self.qinit = tuple(map(int, lines[1].split(', ')))
-        self.qgoal = tuple(map(int, lines[2].split(', ')))
-        for i in range(3, len(lines)):
-            line = tuple(map(int, lines[i].split(', ')))
-            self.obstacles.append(RRT.Rectangle((line[0], line[1]), (line[2], line[3])))
+        """Imports scene from selected file
+        file format: .txt
+        1st line: number of iterations
+        2nd line: QInit
+        3rd line: QGoal
+        other lines: Obstacles
+        (example:
+        1000
+        200, 300
+        600, 200
+        0, 0, 100, 100
+        100, 100, 150, 150
+        )
+        """
+        try:
+            filename, filetype = QFileDialog.getOpenFileName(self,
+                                                             "Выбрать файл",
+                                                             ".",
+                                                             "Text Files(*.txt);;JPEG Files(*.jpeg);;\
+                                                             PNG Files(*.png);;GIF File(*.gif);;All Files(*)")
+            with open(f'{filename}', 'r') as F:
+                lines = F.readlines()
+        except Exception:
+            return 0
+        try:
+            self.iterations = int(lines[0])
+            self.qinit = tuple(map(int, lines[1].split(', ')))
+            self.qgoal = tuple(map(int, lines[2].split(', ')))
+            for i in range(3, len(lines)):
+                line = tuple(map(int, lines[i].split(', ')))
+                self.obstacles.append(RRT.Rectangle((line[0], line[1]), (line[2], line[3])))
+        except Exception:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Can't get scene")
+            msg.setInformativeText("Check if your file is correct\n"
+                                   "(example:\n"
+                                   "1000\n"
+                                   "200, 300\n"
+                                   "600, 200\n"
+                                   "0, 0, 100, 100\n"
+                                   "100, 100, 150, 150\n"
+                                   ")")
+            msg.setWindowTitle("Error")
+            msg.exec_()
 
     def export_file(self):
-        filename, filetype = QFileDialog.getOpenFileName(self,
-                                                         "Выбрать файл",
-                                                         ".",
-                                                         "Text Files(*.txt);;JPEG Files(*.jpeg);;\
-                                                         PNG Files(*.png);;GIF File(*.gif);;All Files(*)")
-        with open(f'{filename}', 'w') as F:
-            F.write(f'{self.iterations}' + '\n')
-            F.write(f'{self.qinit}'[1:-1:] + '\n')
-            F.write(f'{self.qgoal}'[1:-1:] + '\n')
-            for item in self.obstacles:
-                F.write(f'{item.min_p}'[1:-1:] + ', ' + f'{item.max_p}'[1:-1:])
+        """Exports scene to selected file
+                file format: .txt"""
+        try:
+            filename, filetype = QFileDialog.getOpenFileName(self,
+                                                             "Выбрать файл",
+                                                             ".",
+                                                             "Text Files(*.txt);;JPEG Files(*.jpeg);;\
+                                                             PNG Files(*.png);;GIF File(*.gif);;All Files(*)")
+            with open(f'{filename}', 'w') as F:
+                F.write(f'{self.iterations}' + '\n')
+                F.write(f'{self.qinit}'[1:-1:] + '\n')
+                F.write(f'{self.qgoal}'[1:-1:] + '\n')
+                for item in self.obstacles:
+                    F.write(f'{item.min_p}'[1:-1:] + ', ' + f'{item.max_p}'[1:-1:])
+        except Exception:
+            return 0
 
     def start_algorithm(self):
-        self.edges, self.result, self.vertices, self.message = RRT.rapidly_exploring_random_trees(self.iterations,
-                                                                                                  self.qinit,
-                                                                                                  self.qgoal,
-                                                                                                  self.obstacles)
+        """Starts algorithm executing"""
+        try:
+            self.edges, self.result, self.vertices, self.message = RRT.rapidly_exploring_random_trees(self.iterations,
+                                                                                                      self.qinit,
+                                                                                                      self.qgoal,
+                                                                                                      self.obstacles)
+        except Exception:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Can't start executing")
+            msg.setInformativeText("Not enough values entered to start algorithm")
+            msg.setWindowTitle("Error")
+            msg.exec_()
+            return 0
+
         self.flag = True
         if self.message != '':
             self.result_label.setText(f"  Result: {round(float(self.message))}")
